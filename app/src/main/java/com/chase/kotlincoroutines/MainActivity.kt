@@ -7,9 +7,7 @@ import com.chase.kotlincoroutines.adapters.PostAdapter
 import com.chase.kotlincoroutines.model.Post
 import com.chase.kotlincoroutines.network.RetrofitFactory
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.jetbrains.anko.toast
 import retrofit2.HttpException
 import java.io.IOException
@@ -21,21 +19,27 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val service = RetrofitFactory.makeRetrofitService()
-        GlobalScope.launch(Dispatchers.Main) {
+        CoroutineScope(Dispatchers.IO).launch {
             val request = service.getPosts()
-            try {
-                val response = request.await()
-                response.body()?.let { initRecyclerView(it) }
-            } catch (e: HttpException) {
-                toast(e.code())
-            } catch (e: Throwable) {
-                toast("Ooops: Something else went wrong")
+            withContext(Dispatchers.Main) {
+                try {
+                    val response = request.await()
+                    if (response.isSuccessful) {
+                        response.body()?.let { initRecyclerView(it) }
+                    } else {
+                        toast("Error network operation failed with ${response.code()}")
+                    }
+                } catch (e: HttpException) {
+                    toast("Exception ${e.message}")
+                } catch (e: Throwable) {
+                    toast("Ooops: Something else went wrong")
+                }
             }
         }
     }
 
-    private fun initRecyclerView(list:List<Post>) {
+    private fun initRecyclerView(list: List<Post>) {
         recyclerview.layoutManager = LinearLayoutManager(this)
-        recyclerview.adapter = PostAdapter(list,this)
+        recyclerview.adapter = PostAdapter(list, this)
     }
 }
