@@ -3,6 +3,7 @@ package com.chase.kotlincoroutines
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import com.chase.kotlincoroutines.adapters.PostAdapter
 import com.chase.kotlincoroutines.model.Post
 import com.chase.kotlincoroutines.network.RetrofitFactory
@@ -21,19 +22,19 @@ class MainActivity : AppCompatActivity() {
         val service = RetrofitFactory.makeRetrofitService()
         CoroutineScope(Dispatchers.IO).launch {
             val request = service.getPosts()
-            withContext(Dispatchers.Main) {
-                try {
-                    val response = request.await()
+            try {
+                val response = request.await()
+                withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         response.body()?.let { initRecyclerView(it) }
                     } else {
                         toast("Error network operation failed with ${response.code()}")
                     }
-                } catch (e: HttpException) {
-                    toast("Exception ${e.message}")
-                } catch (e: Throwable) {
-                    toast("Ooops: Something else went wrong")
                 }
+            } catch (e: HttpException) {
+                Log.e("REQUEST", "Exception ${e.message}")
+            } catch (e: Throwable) {
+                Log.e("REQUEST", "Ooops: Something else went wrong")
             }
         }
     }
