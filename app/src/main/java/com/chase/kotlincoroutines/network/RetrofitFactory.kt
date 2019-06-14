@@ -1,6 +1,5 @@
 package com.chase.kotlincoroutines.network
 
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -15,7 +14,6 @@ object RetrofitFactory {
             .baseUrl(BASE_URL)
             .client(makeOkHttpClient())
             .addConverterFactory(MoshiConverterFactory.create())
-            .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .build().create(RetrofitService::class.java)
     }
 
@@ -31,7 +29,7 @@ object RetrofitFactory {
     private fun makeLoggingInterceptor(): HttpLoggingInterceptor {
         val logging = HttpLoggingInterceptor()
         logging.level =
-                HttpLoggingInterceptor.Level.BODY
+            HttpLoggingInterceptor.Level.BODY
         return logging
     }
 

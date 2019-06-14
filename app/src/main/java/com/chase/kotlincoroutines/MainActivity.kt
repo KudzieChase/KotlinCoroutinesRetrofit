@@ -21,9 +21,8 @@ class MainActivity : AppCompatActivity() {
 
         val service = RetrofitFactory.makeRetrofitService()
         CoroutineScope(Dispatchers.IO).launch {
-            val request = service.getPosts()
+            val response = service.getPosts()
             try {
-                val response = request.await()
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         response.body()?.let { initRecyclerView(it) }
